@@ -1,0 +1,27 @@
+includes:
+    - vendor/phpstan/phpstan-laravel/extension.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+
+parameters:
+    level: 9
+    paths:
+        - app
+        - tests
+        - database
+        - routes
+
+    ignoreErrors:
+        - '#Unsafe usage of new static\(\)#'
+        - '#Method .* should return .* but return statement is missing#'
+
+    excludePaths:
+        - ./vendor
+        - ./storage
+        - ./bootstrap/cache
+
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    reportUnmatchedIgnoredErrors: true
+    checkFunctionNameCase: true
+    checkInternalClassCaseSensitivity: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true
