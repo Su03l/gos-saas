@@ -1,4 +1,58 @@
 <x-tenant-layout>
+    @if(auth()->user()->hasRole('Admin') && !auth()->user()->onboarding_completed)
+        <div x-data="{ step: 1 }" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 text-center border-t-8 border-primary relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4">
+                    <button @click="step = 4" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div x-show="step === 1">
+                    <div class="h-16 w-16 bg-blue-50 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-4">Welcome to Your Board Portal</h2>
+                    <p class="text-gray-600 mb-8">We'll help you get set up in just a few steps. First, let's customize your portal's look.</p>
+                    <button @click="step = 2" class="w-full py-4 bg-primary text-white rounded-xl font-bold">Start Set Up</button>
+                </div>
+
+                <div x-show="step === 2">
+                    <div class="h-16 w-16 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-4">Step 1: Set Your Branding</h2>
+                    <p class="text-gray-600 mb-8">Upload your company logo and set your primary brand colors in the Settings menu.</p>
+                    <div class="flex gap-4">
+                        <button @click="step = 1" class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-xl font-bold">Back</button>
+                        <button @click="step = 3" class="flex-1 py-4 bg-primary text-white rounded-xl font-bold">Next</button>
+                    </div>
+                </div>
+
+                <div x-show="step === 3">
+                    <div class="h-16 w-16 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-4">Step 2: Add Board Members</h2>
+                    <p class="text-gray-600 mb-8">Use the "Users" menu or the bulk import tool to invite your board members and managers.</p>
+                    <div class="flex gap-4">
+                        <button @click="step = 2" class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-xl font-bold">Back</button>
+                        <button @click="step = 4" class="flex-1 py-4 bg-primary text-white rounded-xl font-bold">Finish Tour</button>
+                    </div>
+                </div>
+
+                <div x-show="step === 4">
+                    <h2 class="text-2xl font-bold mb-4">You're All Set!</h2>
+                    <p class="text-gray-600 mb-8">Your enterprise governance journey starts here. Need help? Click the chat icon anytime.</p>
+                    <form action="{{ route('onboarding.complete') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold">Enter Dashboard</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="space-y-8">
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold text-gray-900">{{ __('messages.welcome_back') }}, {{ auth()->user()->name }}</h1>
