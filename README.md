@@ -1,52 +1,123 @@
-# Governance SaaS — Enterprise Board Portal
+# 🏢 Governance SaaS — Board & Committee Governance Portal
 
-## Introduction
-A high-security, B2B Multi-Tenant SaaS platform designed for Board Management. This application automates governance workflows, including meeting scheduling, AI-powered minutes generation, legally binding electronic voting, and a secure Virtual Data Room (VDR).
+![Laravel Version](https://img.shields.io/badge/Laravel-13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![PHP Version](https://img.shields.io/badge/PHP-8.5-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![Alpine.js](https://img.shields.io/badge/Alpine.js-8BC0D0?style=for-the-badge&logo=alpine.js&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-## Tech Stack
-- **Backend:** Laravel 13, PHP 8.5 (Strictly Typed)
-- **Database:** Isolated SQLite database per tenant for maximum data residency compliance.
-- **Frontend:** Laravel Blade, Tailwind CSS, Alpine.js (Livewire-free for performance).
-- **Real-time:** Laravel Reverb / Echo for live voting updates.
-- **AI:** Integrated with Gemini/OpenAI for automated summarization.
-
-## Multi-Tenant Architecture
-This project uses a **Database-per-Tenant** strategy using SQLite:
-1. Every tenant has a unique `.sqlite` file in `database/tenants/`.
-2. The `TenantIsolationMiddleware` detects the tenant via the current hostname/domain.
-3. It dynamically switches the `database.connections.sqlite.database` configuration at runtime.
-4. Developers **must** ensure all models use the default `sqlite` connection to remain scoped.
-
-## Getting Started
-1. **Clone & Install:**
-   ```bash
-   git clone https://github.com/Su03l/gos-saas.git
-   composer install
-   npm install && npm run build
-   ```
-2. **Environment:**
-   Copy `.env.example` to `.env` and configure your central database.
-3. **Database Setup:**
-   ```bash
-   php artisan migrate --seed # Central DB
-   php artisan app:create-tenant "Company Name" "comp-a.test" # Create first tenant
-   ```
-4. **Queue Worker:**
-   ```bash
-   php artisan queue:work
-   ```
-
-## Testing & Quality
-- **Pest PHP:** Run `php artisan test` for feature and architecture tests.
-- **PHPStan:** Level 9 analysis is enforced. Run `vendor/bin/phpstan analyze`.
-- **Pint:** Style consistency is enforced via `vendor/bin/pint`.
-
-## Security Features
-- IP Allowlisting per Tenant.
-- Forced 2FA for Board Members.
-- Cryptographically hashed voting receipts.
-- SOC2 compliant PII masking in logs.
-- Strict CSP and Security Headers.
+## 📖 Project Overview
+Welcome to the **Governance SaaS** repository. This is an Enterprise-level Board & Committee Governance Portal designed for ultimate security, legal compliance, and real-time collaboration. It automates critical workflows such as AI-powered meeting minutes, legally binding electronic voting, and encrypted Virtual Data Room (VDR) storage.
 
 ---
-*Built with privacy and security by design for the modern enterprise.*
+
+## 🏗 Architecture
+This application utilizes a strict **Database-per-Tenant** architecture using **SQLite**:
+- **Total Isolation:** Every enterprise client (Tenant) gets their own isolated `.sqlite` database file.
+- **Tenant Middleware:** The `TenantIsolationMiddleware` automatically intercepts the request domain, identifies the tenant, and dynamically swaps the `database.connections.sqlite.database` at runtime.
+- **Data Residency & SOC2:** Ensures that cross-tenant data leaks are mathematically impossible at the database layer.
+
+---
+
+## 💻 Tech Stack
+- **Backend Framework:** Laravel 13
+- **Language:** PHP 8.5 (Strictly Typed `declare(strict_types=1)`)
+- **Database Engine:** Central SQLite (for routing/tenants) & Isolated SQLite (per tenant)
+- **Frontend UI:** Laravel Blade, Tailwind CSS v4, Alpine.js (Lightweight & Fast, No Livewire)
+- **PDF Generation:** `carlos-meneses/laravel-mpdf` for robust RTL Arabic support & watermarking
+- **Real-time Engine:** Laravel Reverb & Echo (WebSockets)
+- **AI Integration:** Google Gemini / OpenAI
+
+---
+
+## 🚀 Local Setup
+
+### 1. Prerequisites
+Ensure you have the following installed on your machine:
+- PHP 8.5+
+- Composer
+- Node.js & NPM
+- Laravel Herd / Valet (Recommended for local routing)
+
+### 2. Installation
+```bash
+# Clone the repository
+git clone https://github.com/Su03l/gos-saas.git
+cd gos-saas
+
+# Install PHP dependencies
+composer install
+
+# Install NPM dependencies & build assets
+npm install && npm run build
+```
+
+### 3. Environment Configuration
+Copy the environment file and generate the application key:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+### 4. Database Initialization
+Run the central migrations to build the primary routing database:
+```bash
+php artisan migrate:fresh
+```
+
+### 5. Running the Arabic Demo Seeder
+To instantly populate the application with a highly realistic, SOC2 compliant Arabic dataset (including companies, board members, meetings, and legally binding resolutions), run:
+```bash
+php artisan db:seed --class=RealisticArabicDemoSeeder
+```
+*This will create active tenants like `ufoq.test` and `tanmiyah.test`.*
+
+---
+
+## ⚙️ Queues & Jobs
+Heavy lifting, such as generating watermarked PDFs or sending email notifications, is offloaded to the queue. 
+
+To run the workers locally:
+```bash
+php artisan queue:work --verbose --tries=3 --timeout=90
+```
+*In production, this is managed by Laravel Horizon backed by Redis.*
+
+---
+
+## 🧪 Testing & Code Quality
+We enforce strict architectural boundaries and maximum code quality.
+
+**Run the Test Suite (Pest PHP):**
+Includes strict tenant isolation and architecture tests.
+```bash
+php artisan test
+```
+
+**Run Static Analysis (PHPStan Level 9):**
+```bash
+vendor/bin/phpstan analyze
+```
+
+**Format Code (Laravel Pint):**
+```bash
+vendor/bin/pint
+```
+
+---
+
+## 🚢 Zero-Downtime Deployment
+Deployments are handled via **PHP Deployer**. The configuration file `deploy.php` orchestrates a release-based strategy:
+1. Clones the latest `main` branch into a new release folder.
+2. Runs `composer install` & `npm run build`.
+3. Caches routes, views, and configs.
+4. Updates the persistent symlinks (`.env`, `storage`).
+5. Switches the active `current` symlink to the new release without dropping active HTTP connections.
+
+To deploy manually (if authorized):
+```bash
+dep deploy production
+```
+
+---
+
+*Built with passion, performance, and uncompromising security.* 🔐
