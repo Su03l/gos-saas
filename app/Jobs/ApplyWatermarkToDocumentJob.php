@@ -36,7 +36,15 @@ class ApplyWatermarkToDocumentJob implements ShouldQueue
         $pdf = new Fpdi;
         $pageCount = $pdf->setSourceFile($originalPath);
 
-        $watermarkText = "{$this->userName} | {$this->ipAddress} | ".now()->toDateTimeString();
+        // Fetch the tenant and their template
+        $tenant = $this->media->model->tenant; // Assuming the model has a tenant relationship
+        $template = $tenant->watermark_template ?? 'CONFIDENTIAL - {name} - {ip}';
+
+        $watermarkText = str_replace(
+            ['{name}', '{ip}', '{date}'],
+            [$this->userName, $this->ipAddress, now()->toDateTimeString()],
+            $template
+        );
 
         for ($i = 1; $i <= $pageCount; $i++) {
             $templateId = $pdf->importPage($i);

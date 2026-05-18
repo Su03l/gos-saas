@@ -24,6 +24,7 @@ class Tenant extends Model
         'logo_path',
         'primary_color',
         'secondary_color',
+        'watermark_template',
         'max_users',
         'max_storage_mb',
         'subscription_status',

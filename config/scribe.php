@@ -7,7 +7,7 @@ return [
     'title' => 'Governance SaaS Enterprise API',
     'description' => 'Comprehensive API for enterprise governance integration.',
     'base_url' => config('app.url'),
-    'logo' => session('tenant')?->logo_path ? Storage::url(session('tenant')->logo_path) : false,
+    'logo' => false,
     'auth' => [
         'enabled' => true,
         'default' => true,
