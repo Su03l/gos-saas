@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # PHP Application (FPM)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: governance-saas-onprem
+    container_name: governance_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+      - ./storage/app/tenants:/var/www/storage/app/tenants
+      - ./database/tenants:/var/www/database/tenants
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=sqlite
+    networks:
+      - governance_network
+
+  # Nginx Web Server
+  web:
+    image: nginx:alpine
+    container_name: governance_web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - governance_network
+    depends_on:
+      - app
+
+  # Redis for Queues and Caching
+  redis:
+    image: redis:alpine
+    container_name: governance_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - governance_network
+
+  # Queue Worker
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: governance_worker
+    restart: unless-stopped
+    command: php artisan queue:work --verbose --tries=3 --timeout=90
+    volumes:
+      - .:/var/www
+    networks:
+      - governance_network
+    depends_on:
+      - redis
+
+networks:
+  governance_network:
+    driver: bridge
+
+volumes:
+  redis_data:
