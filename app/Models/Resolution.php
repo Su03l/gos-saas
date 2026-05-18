@@ -29,6 +29,16 @@ class Resolution extends Model
     ];
 
     /**
+     * Mask sensitive resolution text in serialization/logs.
+     */
+    public function toArray(): array
+    {
+        $array = parent::toArray();
+        $array['legally_binding_text'] = '[MASKED_FOR_COMPLIANCE]';
+        return $array;
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

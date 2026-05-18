@@ -43,7 +43,24 @@ class User extends Authenticatable implements HasMedia
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
+
+    /**
+     * Override toArray to mask PII in logs/serialization if needed.
+     */
+    public function toArray(): array
+    {
+        $array = parent::toArray();
+        
+        // Mask email in non-essential serialization (like debug logs)
+        if (config('app.env') === 'production') {
+            $array['email'] = str_repeat('*', 5) . '@' . explode('@', $this->email)[1];
+        }
+
+        return $array;
+    }
 
     /**
      * Get the attributes that should be cast.
