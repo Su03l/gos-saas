@@ -85,12 +85,60 @@
                         </p>
                     </div>
 
-                    <div class="pt-4 border-t border-gray-100">
+                    <div class="pt-4 border-t border-gray-100" 
+                        x-data="{ 
+                            totalVotes: {{ $resolution->votes->count() }},
+                            approvals: {{ $resolution->votes->where('type', 'approve')->count() }},
+                            rejections: {{ $resolution->votes->where('type', 'reject')->count() }},
+                            abstentions: {{ $resolution->votes->where('type', 'abstain')->count() }}
+                        }"
+                        x-init="
+                            window.Echo.private('resolution.{{ $resolution->id }}')
+                                .listen('VoteCastEvent', (e) => {
+                                    totalVotes = e.tally.total;
+                                    approvals = e.tally.approve;
+                                    rejections = e.tally.reject;
+                                    abstentions = e.tally.abstain;
+                                });
+                        ">
                         <h3 class="text-sm font-bold text-gray-700 mb-3">{{ __('Current Tally') }}</h3>
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">{{ __('Votes Cast') }}</span>
-                                <span class="font-bold">{{ $resolution->votes->count() }}</span>
+                                <span class="text-gray-600">{{ __('Total Votes') }}</span>
+                                <span class="font-bold" x-text="totalVotes"></span>
+                            </div>
+                            
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs font-bold text-green-600 uppercase">
+                                    <span>{{ __('Approve') }}</span>
+                                    <span x-text="approvals"></span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                    <div class="bg-green-500 h-1.5 rounded-full transition-all duration-500" 
+                                        :style="`width: ${totalVotes > 0 ? (approvals / totalVotes * 100) : 0}%`"></div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs font-bold text-red-600 uppercase">
+                                    <span>{{ __('Reject') }}</span>
+                                    <span x-text="rejections"></span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                    <div class="bg-red-500 h-1.5 rounded-full transition-all duration-500" 
+                                        :style="`width: ${totalVotes > 0 ? (rejections / totalVotes * 100) : 0}%`"></div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs font-bold text-gray-600 uppercase">
+                                    <span>{{ __('Abstain') }}</span>
+                                    <span x-text="abstentions"></span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                    <div class="bg-gray-400 h-1.5 rounded-full transition-all duration-500" 
+                                        :style="`width: ${totalVotes > 0 ? (abstentions / totalVotes * 100) : 0}%`"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
