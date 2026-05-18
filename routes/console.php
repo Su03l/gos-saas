@@ -12,3 +12,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::job(new CheckOverdueTasksJob)->daily();
+
+Schedule::command('app:purge-old-data')->monthly();
