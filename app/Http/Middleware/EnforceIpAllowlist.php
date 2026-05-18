@@ -17,6 +17,11 @@ class EnforceIpAllowlist
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Bypass for Super Admins
+        if ($request->user()?->hasRole('super-admin')) {
+            return $next($request);
+        }
+
         $tenant = session('tenant');
 
         if (! $tenant || ! $tenant->allowed_ips) {
