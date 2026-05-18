@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\ExecutionTask;
 use App\Models\Meeting;
 use App\Models\Resolution;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class TenantAnalyticsService
@@ -18,18 +19,22 @@ class TenantAnalyticsService
      */
     public function getTaskCompletionStats(): array
     {
-        $stats = ExecutionTask::select('status', DB::raw('count(*) as count'))
-            ->groupBy('status')
-            ->pluck('count', 'status')
-            ->toArray();
+        $tenantId = session('tenant')?->id ?? 'global';
 
-        return [
-            'pending' => (int) ($stats['pending'] ?? 0),
-            'in_progress' => (int) ($stats['in_progress'] ?? 0),
-            'evidence_submitted' => (int) ($stats['evidence_submitted'] ?? 0),
-            'closed' => (int) ($stats['closed'] ?? 0),
-            'escalated' => (int) ($stats['escalated'] ?? 0),
-        ];
+        return Cache::tags(['tenant_'.$tenantId])->remember('task_completion_stats', 3600, function () {
+            $stats = ExecutionTask::select('status', DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->pluck('count', 'status')
+                ->toArray();
+
+            return [
+                'pending' => (int) ($stats['pending'] ?? 0),
+                'in_progress' => (int) ($stats['in_progress'] ?? 0),
+                'evidence_submitted' => (int) ($stats['evidence_submitted'] ?? 0),
+                'closed' => (int) ($stats['closed'] ?? 0),
+                'escalated' => (int) ($stats['escalated'] ?? 0),
+            ];
+        });
     }
 
     /**
@@ -39,10 +44,14 @@ class TenantAnalyticsService
      */
     public function getGeneralStats(): array
     {
-        return [
-            'upcoming_meetings' => Meeting::where('scheduled_start', '>', now())->count(),
-            'active_resolutions' => Resolution::where('state', 'voting')->count(),
-            'approved_resolutions' => Resolution::where('state', 'approved')->count(),
-        ];
+        $tenantId = session('tenant')?->id ?? 'global';
+
+        return Cache::tags(['tenant_'.$tenantId])->remember('general_dashboard_stats', 3600, function () {
+            return [
+                'upcoming_meetings' => Meeting::where('scheduled_start', '>', now())->count(),
+                'active_resolutions' => Resolution::where('state', 'voting')->count(),
+                'approved_resolutions' => Resolution::where('state', 'approved')->count(),
+            ];
+        });
     }
 }
